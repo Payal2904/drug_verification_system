@@ -1,0 +1,20 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /profile/
+Disallow: /reports/
+Disallow: /supply-chain/
+
+# Allow public pages
+Allow: /
+Allow: /scan
+Allow: /verify
+Allow: /login
+Allow: /register
+
+# Sitemap
+Sitemap: https://drugverify.com/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1

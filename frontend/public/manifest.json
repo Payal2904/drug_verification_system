@@ -1,0 +1,16 @@
+{
+  "short_name": "DrugVerify",
+  "name": "Drug Authenticity Verification System",
+  "description": "Secure drug authenticity verification using blockchain technology",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "categories": ["health", "medical", "utilities"],
+  "prefer_related_applications": false,
+  "related_applications": []
+}

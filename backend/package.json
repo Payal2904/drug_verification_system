@@ -1,0 +1,34 @@
+{
+  "name": "drug-authenticity-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Drug Authenticity Verification System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node simple-server.js",
+    "dev": "nodemon simple-server.js",
+    "complex": "node server.js",
+    "test": "jest",
+    "init-db": "node scripts/init-database.js",
+    "seed-db": "node scripts/seed-database.js"
+  },
+  "keywords": [
+    "drug-verification",
+    "blockchain",
+    "supply-chain",
+    "authenticity",
+    "pharmacy"
+  ],
+  "author": "Drug Verification System",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
