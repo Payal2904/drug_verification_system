@@ -222,7 +222,15 @@ class DataService {
 
     if (drug) {
       // Check expiry
-      const isExpired = new Date(drug.expiryDate) < new Date();
+      const drugExpiryDate = new Date(drug.expiryDate);
+      const currentDate = new Date();
+      const isExpired = drugExpiryDate < currentDate;
+      
+      console.log('🗓️ Drug expiry check:');
+      console.log('  Drug expiry:', drug.expiryDate, '→', drugExpiryDate);
+      console.log('  Current date:', currentDate);
+      console.log('  Is expired?', isExpired);
+      console.log('  Result will be:', isExpired ? 'expired' : 'authentic');
 
       return {
         success: true,

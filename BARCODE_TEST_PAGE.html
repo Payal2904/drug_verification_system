@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Test Images - Drug Verification System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .drug-card {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .drug-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .drug-info {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .code-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: center;
+        }
+        .code-item {
+            flex: 1;
+            min-width: 300px;
+        }
+        .code-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .barcode-img {
+            background: white;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .qr-img {
+            background: white;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .code-value {
+            font-family: 'Courier New', monospace;
+            background: #f8f8f8;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        .print-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .print-btn:hover {
+            background: #5568d3;
+        }
+        @media print {
+            body {
+                background: white;
+            }
+            .instructions, .print-btn, .header {
+                display: none;
+            }
+            .drug-card {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔬 Drug Verification Test Codes</h1>
+        <p>Use these codes to test both camera scanning and image upload</p>
+    </div>
+
+    <div class="instructions">
+        <h3>📱 How to Test Camera Scanning:</h3>
+        <ol>
+            <li><strong>Display Method:</strong> Open this page on another device/screen</li>
+            <li>Go to http://localhost:3000/scan on your test device</li>
+            <li>Click "Camera Scan" → Select "Barcode Only" or "Any Code"</li>
+            <li>Point your camera at the barcodes below</li>
+            <li>The scanner will detect and verify the drug!</li>
+        </ol>
+        <h3>📤 How to Test Image Upload:</h3>
+        <ol>
+            <li>Right-click any barcode/QR code below → "Save Image As..."</li>
+            <li>Go to http://localhost:3000/scan</li>
+            <li>Click "Upload Image"</li>
+            <li>Select the saved image → Instant verification!</li>
+        </ol>
+        <button class="print-btn" onclick="window.print()">🖨️ Print These Codes</button>
+    </div>
+
+    <!-- Drug 1: Paracetamol -->
+    <div class="drug-card">
+        <div class="drug-name">💊 Paracetamol 500mg</div>
+        <div class="drug-info">
+            Manufacturer: Pharma Corp | Batch: BATCH001 | Expected Result: ✅ <strong>AUTHENTIC</strong>
+        </div>
+        <div class="code-section">
+            <div class="code-item">
+                <div class="code-label">BARCODE:</div>
+                <div class="code-value">123456789012</div>
+                <div class="barcode-img">
+                    <img src="https://barcode.tec-it.com/barcode.ashx?data=123456789012&code=Code128&dpi=150" 
+                         alt="Paracetamol Barcode" 
+                         style="height: 100px; width: auto;">
+                </div>
+            </div>
+            <div class="code-item">
+                <div class="code-label">QR CODE:</div>
+                <div class="code-value">QR001PARA500BATCH001</div>
+                <div class="qr-img">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=QR001PARA500BATCH001" 
+                         alt="Paracetamol QR Code">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drug 2: Amoxicillin -->
+    <div class="drug-card">
+        <div class="drug-name">💊 Amoxicillin 250mg</div>
+        <div class="drug-info">
+            Manufacturer: MediCare Inc | Batch: BATCH002 | Expected Result: ✅ <strong>AUTHENTIC</strong>
+        </div>
+        <div class="code-section">
+            <div class="code-item">
+                <div class="code-label">BARCODE:</div>
+                <div class="code-value">234567890123</div>
+                <div class="barcode-img">
+                    <img src="https://barcode.tec-it.com/barcode.ashx?data=234567890123&code=Code128&dpi=150" 
+                         alt="Amoxicillin Barcode"
+                         style="height: 100px; width: auto;">
+                </div>
+            </div>
+            <div class="code-item">
+                <div class="code-label">QR CODE:</div>
+                <div class="code-value">QR002AMOX250BATCH002</div>
+                <div class="qr-img">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=QR002AMOX250BATCH002" 
+                         alt="Amoxicillin QR Code">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drug 3: Lisinopril -->
+    <div class="drug-card">
+        <div class="drug-name">💊 Lisinopril 10mg</div>
+        <div class="drug-info">
+            Manufacturer: GlobalMed Ltd | Batch: BATCH003 | Expected Result: ✅ <strong>AUTHENTIC</strong>
+        </div>
+        <div class="code-section">
+            <div class="code-item">
+                <div class="code-label">BARCODE:</div>
+                <div class="code-value">345678901234</div>
+                <div class="barcode-img">
+                    <img src="https://barcode.tec-it.com/barcode.ashx?data=345678901234&code=Code128&dpi=150" 
+                         alt="Lisinopril Barcode"
+                         style="height: 100px; width: auto;">
+                </div>
+            </div>
+            <div class="code-item">
+                <div class="code-label">QR CODE:</div>
+                <div class="code-value">QR003LISI10BATCH003</div>
+                <div class="qr-img">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=QR003LISI10BATCH003" 
+                         alt="Lisinopril QR Code">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fake Drug -->
+    <div class="drug-card" style="border: 3px solid #f44336;">
+        <div class="drug-name" style="color: #f44336;">⚠️ COUNTERFEIT DRUG (Test)</div>
+        <div class="drug-info">
+            Unknown Source | Expected Result: ❌ <strong>NOT FOUND / COUNTERFEIT</strong>
+        </div>
+        <div class="code-section">
+            <div class="code-item">
+                <div class="code-label">BARCODE:</div>
+                <div class="code-value">999999999999</div>
+                <div class="barcode-img">
+                    <img src="https://barcode.tec-it.com/barcode.ashx?data=999999999999&code=Code128&dpi=150" 
+                         alt="Fake Drug Barcode"
+                         style="height: 100px; width: auto;">
+                </div>
+            </div>
+            <div class="code-item">
+                <div class="code-label">QR CODE:</div>
+                <div class="code-value">FAKE999INVALID</div>
+                <div class="qr-img">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=FAKE999INVALID" 
+                         alt="Fake Drug QR Code">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions" style="background: #fff3cd; border-left-color: #ffc107;">
+        <h3>💡 Tips for Best Results:</h3>
+        <ul>
+            <li><strong>Lighting:</strong> Use good lighting, avoid shadows on the code</li>
+            <li><strong>Distance:</strong> Hold phone 10-20cm from the code</li>
+            <li><strong>Steadiness:</strong> Keep camera steady, wait 2-3 seconds</li>
+            <li><strong>Focus:</strong> Ensure the code is in focus and fills the scanning frame</li>
+            <li><strong>Barcode Scanning:</strong> May take a few attempts (shows "🔍 Scanning... Attempt X")</li>
+            <li><strong>QR Codes:</strong> Detect faster than barcodes</li>
+        </ul>
+    </div>
+
+    <div class="instructions" style="background: #e8f5e9; border-left-color: #4caf50;">
+        <h3>✅ Expected Verification Results:</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="background: #f5f5f5; font-weight: bold;">
+                <td style="padding: 10px; border: 1px solid #ddd;">Drug</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Barcode</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">QR Code</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Expected Result</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Paracetamol 500mg</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">123456789012</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">QR001PARA500BATCH001</td>
+                <td style="padding: 10px; border: 1px solid #ddd; color: green; font-weight: bold;">✅ AUTHENTIC</td>
+            </tr>
+            <tr style="background: #f9f9f9;">
+                <td style="padding: 10px; border: 1px solid #ddd;">Amoxicillin 250mg</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">234567890123</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">QR002AMOX250BATCH002</td>
+                <td style="padding: 10px; border: 1px solid #ddd; color: green; font-weight: bold;">✅ AUTHENTIC</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Lisinopril 10mg</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">345678901234</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">QR003LISI10BATCH003</td>
+                <td style="padding: 10px; border: 1px solid #ddd; color: green; font-weight: bold;">✅ AUTHENTIC</td>
+            </tr>
+            <tr style="background: #ffebee;">
+                <td style="padding: 10px; border: 1px solid #ddd;">Fake Drug</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">999999999999</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">FAKE999INVALID</td>
+                <td style="padding: 10px; border: 1px solid #ddd; color: red; font-weight: bold;">❌ NOT FOUND</td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+
