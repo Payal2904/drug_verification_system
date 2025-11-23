@@ -1,10 +1,15 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Camera, Upload, FileImage, CheckCircle, AlertTriangle, Shield, Scan } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import jsQR from 'jsqr';
+import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
 import CameraScanner from '../components/scanning/CameraScanner';
+import drugApiService from '../services/drugApiService';
 
 const ScanPage = () => {
+  const navigate = useNavigate();
   const [scanMode, setScanMode] = useState('camera'); // 'camera', 'upload'
   const [scanType, setScanType] = useState('all'); // 'qr', 'barcode', 'all'
   const [isScanning, setIsScanning] = useState(false);
@@ -13,103 +18,68 @@ const ScanPage = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
 
-  // Mock verification data
-  const mockVerificationData = {
-    'QR001PARA500BATCH001': {
-      isAuthentic: true,
-      drug: {
-        name: 'Paracetamol',
-        strength: '500mg',
-        manufacturer: 'PharmaCorp Ltd',
-        batchNumber: 'BATCH001',
-        expiryDate: '2025-12-31',
-        manufacturingDate: '2023-01-15'
-      },
-      supplyChain: [
-        { stage: 'Manufacturing', location: 'Mumbai, India', date: '2023-01-15', verified: true },
-        { stage: 'Distribution', location: 'Delhi, India', date: '2023-01-20', verified: true },
-        { stage: 'Retail', location: 'Local Pharmacy', date: '2023-01-25', verified: true }
-      ]
-    },
-    'QR002AMOX250BATCH002': {
-      isAuthentic: true,
-      drug: {
-        name: 'Amoxicillin',
-        strength: '250mg',
-        manufacturer: 'MediCore Industries',
-        batchNumber: 'BATCH002',
-        expiryDate: '2025-06-30',
-        manufacturingDate: '2023-02-10'
-      },
-      supplyChain: [
-        { stage: 'Manufacturing', location: 'Chennai, India', date: '2023-02-10', verified: true },
-        { stage: 'Distribution', location: 'Bangalore, India', date: '2023-02-15', verified: true },
-        { stage: 'Retail', location: 'Local Pharmacy', date: '2023-02-20', verified: true }
-      ]
-    },
-    '123456789012': {
-      isAuthentic: true,
-      drug: {
-        name: 'Ibuprofen',
-        strength: '400mg',
-        manufacturer: 'HealthFirst Pharma',
-        batchNumber: 'BATCH003',
-        expiryDate: '2025-08-15',
-        manufacturingDate: '2023-03-05'
-      },
-      supplyChain: [
-        { stage: 'Manufacturing', location: 'Pune, India', date: '2023-03-05', verified: true },
-        { stage: 'Distribution', location: 'Mumbai, India', date: '2023-03-10', verified: true },
-        { stage: 'Retail', location: 'Local Pharmacy', date: '2023-03-15', verified: true }
-      ]
-    },
-    '987654321098': {
-      isAuthentic: true,
-      drug: {
-        name: 'Aspirin',
-        strength: '75mg',
-        manufacturer: 'CardioCare Ltd',
-        batchNumber: 'BATCH004',
-        expiryDate: '2025-11-20',
-        manufacturingDate: '2023-04-01'
-      },
-      supplyChain: [
-        { stage: 'Manufacturing', location: 'Hyderabad, India', date: '2023-04-01', verified: true },
-        { stage: 'Distribution', location: 'Kolkata, India', date: '2023-04-06', verified: true },
-        { stage: 'Retail', location: 'Local Pharmacy', date: '2023-04-11', verified: true }
-      ]
-    }
-  };
-
-  // Handle successful scan
+  // Handle successful scan - uses YOUR actual QR code data
   const handleScanSuccess = useCallback(async (result) => {
     setScanResult(result);
     setIsVerifying(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('🔍 Reading YOUR QR code data:', result.data);
+      
+      // Verify against real database using YOUR QR code data
+      const searchData = {};
+      if (result.type === 'qr') {
+        searchData.qrCode = result.data; // YOUR actual QR code content
+      } else if (result.type === 'barcode') {
+        searchData.barcode = result.data;
+      }
 
-      const verification = mockVerificationData[result.data] || {
-        isAuthentic: false,
-        drug: {
+      // Check database for YOUR scanned code (now using real API)
+      const dbResult = await drugApiService.verifyDrug(searchData);
+      
+      console.log('📦 Database result:', dbResult);
+      console.log('🔍 Result status:', dbResult.result);
+      console.log('💊 Drug found:', dbResult.drug);
+      console.log('✅ Success flag:', dbResult.success);
+      
+      // Convert database result to display format
+      const verification = {
+        isAuthentic: dbResult.result === 'authentic',
+        isExpired: dbResult.result === 'expired',
+        isFound: dbResult.drug !== null && dbResult.drug !== undefined,
+        drug: dbResult.drug || {
           name: 'Unknown Drug',
           manufacturer: 'Unknown',
-          batchNumber: 'Unknown'
+          batchNumber: result.data || 'Unknown'
         },
-        error: 'Drug not found in database or potentially counterfeit'
+        supplyChain: dbResult.supplyChain || [],
+        authenticity_score: dbResult.authenticity_score || 0,
+        risk_factors: dbResult.risk_factors || [],
+        error: dbResult.result === 'not_found' ? `Drug with code "${result.data}" not found in database. This may be counterfeit.` : null
       };
+
+      console.log('🎯 Verification result:', verification);
+      console.log('  isAuthentic:', verification.isAuthentic);
+      console.log('  isExpired:', verification.isExpired);
+      console.log('  isFound:', verification.isFound);
 
       setVerificationResult(verification);
 
       if (verification.isAuthentic) {
-        toast.success('Drug verified successfully!');
+        toast.success(`✅ Drug verified! Found: ${verification.drug.name}`);
+      } else if (verification.isExpired) {
+        toast.error(`⚠️ Warning: Drug found but EXPIRED! ${verification.drug.name}`);
       } else {
-        toast.error('Warning: Potentially counterfeit drug detected!');
+        toast.error(`❌ Warning: Code "${result.data}" not found in database!`);
       }
     } catch (error) {
       console.error('Verification error:', error);
       toast.error('Verification failed. Please try again.');
+      setVerificationResult({
+        isAuthentic: false,
+        drug: { name: 'Error', manufacturer: 'Error', batchNumber: 'Error' },
+        error: 'Verification system error'
+      });
     } finally {
       setIsVerifying(false);
     }
@@ -121,31 +91,159 @@ const ScanPage = () => {
     toast.error('Scanning failed. Please check camera permissions.');
   }, []);
 
-  // Handle file upload
-  const handleFileUpload = useCallback((event) => {
+  // Simple barcode pattern detection (checks for vertical line patterns typical of barcodes)
+  const detectBarcodePattern = useCallback((imageData) => {
+    const { data, width, height } = imageData;
+    
+    // Check middle horizontal line for barcode-like patterns
+    const middleY = Math.floor(height / 2);
+    const lineStart = middleY * width * 4;
+    
+    let transitions = 0;
+    let lastIntensity = 0;
+    const threshold = 50;
+    
+    // Count black-to-white and white-to-black transitions
+    for (let x = 0; x < width; x++) {
+      const idx = lineStart + (x * 4);
+      const intensity = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+      
+      if (Math.abs(intensity - lastIntensity) > threshold) {
+        transitions++;
+      }
+      lastIntensity = intensity;
+    }
+    
+    // Barcodes typically have many transitions (stripes)
+    const transitionRatio = transitions / width;
+    const hasEnoughTransitions = transitionRatio > 0.1 && transitionRatio < 0.8;
+    
+    console.log(`🔍 Barcode pattern analysis:`);
+    console.log(`  - Transitions: ${transitions}`);
+    console.log(`  - Transition ratio: ${transitionRatio.toFixed(3)}`);
+    console.log(`  - Likely barcode: ${hasEnoughTransitions}`);
+    
+    return hasEnoughTransitions;
+  }, []);
+
+  // Handle file upload and decode QR code OR Barcode
+  const handleFileUpload = useCallback(async (event) => {
     const file = event.target.files[0];
     if (file) {
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           setUploadedImage(e.target.result);
+          setIsVerifying(true);
+          toast.success('Image uploaded! Detecting code...');
+          console.log('📸 Image uploaded, starting code detection...');
 
-          // Simulate scanning from uploaded image
-          setTimeout(() => {
-            // Mock QR detection from image
-            const mockResult = {
-              type: 'qr',
-              data: 'QR001PARA500BATCH001'
-            };
-            handleScanSuccess(mockResult);
-          }, 1000);
+          // Create an image element
+          const img = new Image();
+          img.onload = async () => {
+            console.log(`📐 Image dimensions: ${img.width}x${img.height}`);
+            
+            // Create a canvas to extract image data
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+            console.log('🎨 Image drawn on canvas');
+            
+            // Get image data for jsQR (QR code detection)
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            console.log(`🔍 Image data extracted: ${imageData.width}x${imageData.height}`);
+            
+            let detected = false;
+            
+            // STEP 1: Try QR code detection with jsQR
+            if (scanType === 'qr' || scanType === 'all') {
+              console.log('🔎 Attempting QR code detection with jsQR...');
+              let qrCode = null;
+              
+              // Try multiple inversion attempts
+              qrCode = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "attemptBoth",
+              });
+              
+              if (qrCode && qrCode.data) {
+                console.log('✅ QR CODE FOUND!');
+                console.log('📱 QR Data:', qrCode.data);
+                
+                toast.success(`QR code detected: ${qrCode.data.substring(0, 30)}...`);
+                const result = {
+                  type: 'qr',
+                  data: qrCode.data
+                };
+                handleScanSuccess(result);
+                detected = true;
+              }
+            }
+            
+            // STEP 2: Try Barcode detection with ZXing (if QR not found)
+            if (!detected && (scanType === 'barcode' || scanType === 'all')) {
+              console.log('📊 Attempting BARCODE detection with ZXing...');
+              
+              try {
+                const codeReader = new BrowserMultiFormatReader();
+                
+                // Decode from canvas or image element
+                const result = await codeReader.decodeFromImageElement(img);
+                
+                if (result && result.text) {
+                  console.log('✅ BARCODE FOUND!');
+                  console.log('📊 Barcode Data:', result.text);
+                  console.log('📊 Barcode Format:', result.format);
+                  
+                  toast.success(`Barcode detected: ${result.text}`);
+                  const barcodeResult = {
+                    type: 'barcode',
+                    data: result.text
+                  };
+                  handleScanSuccess(barcodeResult);
+                  detected = true;
+                }
+              } catch (error) {
+                if (error instanceof NotFoundException) {
+                  console.log('⚠️ ZXing could not find a barcode');
+                } else {
+                  console.error('⚠️ ZXing barcode detection error:', error);
+                }
+              }
+            }
+            
+            // STEP 3: If nothing detected, show error
+            if (!detected) {
+              console.error('❌ No QR code or barcode detected in image');
+              console.log('💡 Tips:');
+              console.log('  - Ensure entire code is visible and clear');
+              console.log('  - Try a higher resolution image');
+              console.log('  - Check lighting and focus');
+              console.log('  - For manual entry, use the Verify page');
+              
+              toast.error('Could not read any code from image. Please try:\n• A clearer, better-lit image\n• Manual entry on Verify page\n• Test codes: QR001PARA500BATCH001 or barcode: 123456789012');
+              setUploadedImage(null);
+              setIsVerifying(false);
+            }
+          };
+          
+          img.onerror = (error) => {
+            console.error('❌ Failed to load image:', error);
+            toast.error('Failed to load image. Please try another image.');
+            setUploadedImage(null);
+            setIsVerifying(false);
+          };
+          
+          img.src = e.target.result;
         };
         reader.readAsDataURL(file);
       } else {
-        toast.error('Please select a valid image file.');
+        toast.error('Please select a valid image file (PNG, JPG, etc.)');
       }
     }
-  }, [handleScanSuccess]);
+  }, [handleScanSuccess, scanType]);
 
   // Reset scan
   const resetScan = useCallback(() => {
@@ -153,6 +251,20 @@ const ScanPage = () => {
     setVerificationResult(null);
     setUploadedImage(null);
   }, []);
+
+  // Handle report counterfeit
+  const handleReportCounterfeit = useCallback(() => {
+    // Navigate to create report page with pre-filled data
+    navigate('/reports/create', {
+      state: {
+        drugName: verificationResult?.drug?.name || 'Unknown Drug',
+        batchNumber: verificationResult?.drug?.batchNumber || scanResult?.data || 'Unknown',
+        drugCode: scanResult?.data || '',
+        reportType: 'counterfeit',
+        description: `Suspicious drug detected via scanning. Drug: ${verificationResult?.drug?.name || 'Unknown'}, Batch: ${verificationResult?.drug?.batchNumber || 'Unknown'}`
+      }
+    });
+  }, [navigate, verificationResult, scanResult]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -317,6 +429,8 @@ const ScanPage = () => {
                 <div className={`p-6 ${
                   verificationResult.isAuthentic
                     ? 'bg-gradient-to-r from-green-500 to-green-600'
+                    : verificationResult.isExpired
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-600'
                     : 'bg-gradient-to-r from-red-500 to-red-600'
                 } text-white`}>
                   <div className="flex items-center">
@@ -327,11 +441,17 @@ const ScanPage = () => {
                     )}
                     <div>
                       <h2 className="text-xl font-bold">
-                        {verificationResult.isAuthentic ? 'Authentic Drug' : 'Warning: Suspicious Drug'}
+                        {verificationResult.isAuthentic 
+                          ? 'Authentic Drug' 
+                          : verificationResult.isExpired 
+                          ? 'Warning: Drug is Expired'
+                          : 'Warning: Suspicious Drug'}
                       </h2>
                       <p className="text-sm opacity-90">
                         {verificationResult.isAuthentic
                           ? 'This drug has been verified as authentic'
+                          : verificationResult.isExpired
+                          ? 'This drug was found in the database but has expired'
                           : 'This drug could not be verified or may be counterfeit'}
                       </p>
                     </div>
@@ -340,6 +460,21 @@ const ScanPage = () => {
 
                 {/* Drug Information */}
                 <div className="p-6">
+                  {/* Show scanned QR/Barcode data */}
+                  {scanResult && (
+                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="text-sm font-semibold text-blue-900 mb-2">
+                        📱 Scanned {scanResult.type === 'qr' ? 'QR Code' : 'Barcode'} Data:
+                      </h4>
+                      <p className="text-blue-800 font-mono text-sm break-all">
+                        {scanResult.data}
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        ↑ This is YOUR actual uploaded code data
+                      </p>
+                    </div>
+                  )}
+
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">Drug Information</h3>
@@ -411,7 +546,10 @@ const ScanPage = () => {
                       Scan Another Drug
                     </button>
                     {!verificationResult.isAuthentic && (
-                      <button className="btn btn-error flex-1">
+                      <button 
+                        onClick={handleReportCounterfeit}
+                        className="btn btn-error flex-1"
+                      >
                         Report Counterfeit
                       </button>
                     )}

@@ -1,6 +1,8 @@
-# 🎓 Drug Authenticity Verification System - College Project
+# 💊 PharmaScan Pro - Intelligent Drug Verification Platform
 
-**A modern web application to verify pharmaceutical drug authenticity using QR codes, barcodes, and supply chain tracking.**
+**Enterprise-Grade Pharmaceutical Authentication System with AI-Powered Analysis & Blockchain-Inspired Supply Chain Tracking**
+
+A cutting-edge web application that combats counterfeit medications through multi-modal verification (QR codes, barcodes, manual entry) and transparent supply chain monitoring.
 
 ![React](https://img.shields.io/badge/React-18.2.0-blue.svg)
 ![Node.js](https://img.shields.io/badge/Node.js-16+-green.svg)
